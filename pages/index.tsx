@@ -1,35 +1,30 @@
 import AlertIcon from "@mui/icons-material/Warning";
-import TheHero from "../components/App/TheHero"
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
-import axios from "axios";
-import type { NextPage } from "next";
+import type { GetServerSideProps, NextPage } from "next";
 import { useEffect, useState } from "react";
-import BlogInfoCard from "../components/App/BlogInfoCard";
+import TheHero from "../components/App/TheHero";
 import TheLayout from "../components/Layout/TheLayout";
-
+import getSomeOfEachCategory from "./api/getSomeOfEachCategory";
 
 interface Props {
-  blogs: {
-    statusText: string,
-    data: any
+  news: {
+    data: any[];
   };
   error: {
     message: string;
   };
 }
 
-const Home: NextPage<Props> = ({ blogs, error }) => {
-  const [isAlertOpen, setIsAlertOpen] = useState<boolean>(false);
+const Home: NextPage<Props> = ({ news, error }) => {
   const [isLoading, setLoading] = useState<boolean>(true);
-
   useEffect(() => {
-    if (blogs || error) {
+    if (news || error) {
       setLoading(false);
     }
-  }, [blogs, error]);
+  }, [news, error]);
 
   const reloadHandler = () => {
     window.location.reload();
@@ -40,7 +35,7 @@ const Home: NextPage<Props> = ({ blogs, error }) => {
       {isLoading ? (
         <div>Loading</div>
       ) : (
-        <TheLayout>
+        <TheLayout topics={news.data.map((n) => n.topic)}>
           <Container
             sx={{
               margin: "0 auto",
@@ -48,38 +43,47 @@ const Home: NextPage<Props> = ({ blogs, error }) => {
             }}
           >
             <Box sx={{ mt: 2, p: 2 }}>
-              {blogs.statusText === "OK" ? (
-                <TheHero blogs={blogs.data.articles} />
-              ) : (
-                <Alert
-                  icon={<AlertIcon />}
-                  color="error"
-                  action={
-                    <Button
-                      color="error"
-                      size="small"
-                      variant="contained"
-                      onClick={reloadHandler}
-                    >
-                      Reload
-                    </Button>
-                  }
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      flexGrow: 1,
-                      justifyContent: "space-between",
-                    }}
-                    component="div"
-                  >
-                    <Box component="span">
-                      {error.message + ", please try reloading the page." ||
-                        "Couldn't fetch the blogs, please reload the page."}
-                    </Box>
-                  </Box>
+              {error && error.message.includes("429") ? (
+                <Alert icon={<AlertIcon />} color="error">
+                  Sorry you have to try later 100 request per day is over. Try
+                  again tomorrow.
                 </Alert>
+              ) : (
+                <>
+                  {!error && news.data.length > 0 ? (
+                    <TheHero news={news.data} />
+                  ) : (
+                    <Alert
+                      icon={<AlertIcon />}
+                      color="error"
+                      action={
+                        <Button
+                          color="error"
+                          size="small"
+                          variant="contained"
+                          onClick={reloadHandler}
+                        >
+                          Reload
+                        </Button>
+                      }
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          flexGrow: 1,
+                          justifyContent: "space-between",
+                        }}
+                        component="div"
+                      >
+                        <Box component="span">
+                          {error.message + ", please try reloading the page." ||
+                            "Couldn't fetch the blogs, please reload the page."}
+                        </Box>
+                      </Box>
+                    </Alert>
+                  )}
+                </>
               )}
             </Box>
           </Container>
@@ -91,27 +95,12 @@ const Home: NextPage<Props> = ({ blogs, error }) => {
 
 export default Home;
 
-export const getServerSideProps = async () => {
-  let response;
-  let error = null;
-  try {
-    response = await axios.get(
-      "https://newsapi.org/v2/top-headlines?category=technology&country=us",
-      {
-        headers: {
-          Authorization: process.env.BLOG_API_KEY!,
-        },
-      }
-    );
-  } catch (e: any) {
-    error = e.message;
-  }
-
+export const getServerSideProps: GetServerSideProps = async () => {
+  const { data: responses, error } = await getSomeOfEachCategory();
   return {
     props: {
-      blogs: {
-        data: response?.statusText === "OK" && response.data,
-        statusText: response?.statusText,
+      news: {
+        data: responses,
       },
       error: {
         message: error,
