@@ -35,7 +35,7 @@ const Home: NextPage<Props> = ({ news, error }) => {
       {isLoading ? (
         <div>Loading</div>
       ) : (
-        <TheLayout topics={news.data.map((n) => n.topic)}>
+        <TheLayout>
           <Container
             sx={{
               margin: "0 auto",

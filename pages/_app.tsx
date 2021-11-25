@@ -1,6 +1,7 @@
 import type { AppProps } from "next/app";
 import "../styles/globals.css";
 import "../styles/tailwindcss.css";
+import CtxProvider from "../store/context/topics"
 
 import {ThemeProvider, createTheme, ThemeOptions} from "@mui/material/styles";
 
@@ -30,8 +31,10 @@ interface Props extends AppProps {
 function MyApp({ Component, pageProps, news }: Props) {
   return (
     <ThemeProvider theme={theme}>
+    <CtxProvider>
       <Component {...pageProps} />
     </ThemeProvider>
+    </CtxProvider>
   );
 }
 
