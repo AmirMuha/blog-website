@@ -1,11 +1,12 @@
-import AlertIcon from "@mui/icons-material/Warning";
+import type { GetServerSideProps, NextPage } from "next";
+import { useEffect, useState } from "react";
+
 import Alert from "@mui/material/Alert";
+import AlertIcon from "@mui/icons-material/Warning";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
-import type { GetServerSideProps, NextPage } from "next";
-import { useEffect, useState } from "react";
-import TheHero from "../components/App/TheHero";
+import NewsCategories from "../components/App/NewsCategories";
 import TheLayout from "../components/Layout/TheLayout";
 import getSomeOfEachCategory from "./api/getSomeOfEachCategory";
 
@@ -51,7 +52,7 @@ const Home: NextPage<Props> = ({ news, error }) => {
               ) : (
                 <>
                   {!error.message && news.data.length > 0 ? (
-                    <TheHero news={news.data} />
+                    <NewsCategories news={news.data} />
                   ) : (
                     <Alert
                       icon={<AlertIcon />}
