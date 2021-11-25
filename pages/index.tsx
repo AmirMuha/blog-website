@@ -43,14 +43,14 @@ const Home: NextPage<Props> = ({ news, error }) => {
             }}
           >
             <Box sx={{ mt: 2, p: 2 }}>
-              {error && error.message.includes("429") ? (
+              {error.message && error?.message?.includes("429") ? (
                 <Alert icon={<AlertIcon />} color="error">
                   Sorry you have to try later 100 request per day is over. Try
                   again tomorrow.
                 </Alert>
               ) : (
                 <>
-                  {!error && news.data.length > 0 ? (
+                  {!error.message && news.data.length > 0 ? (
                     <TheHero news={news.data} />
                   ) : (
                     <Alert
