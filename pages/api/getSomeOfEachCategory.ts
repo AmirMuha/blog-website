@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from "axios";
+import { NextApiRequest, NextApiResponse } from "next";
 export type CategoryTopics =
   | "technology"
   | "science"
@@ -22,7 +23,10 @@ const fetchedData = async (
   );
 };
 
-const getSomeOfEachCategory = async (): Promise<{
+const getSomeOfEachCategory = async (
+  _: NextApiRequest,
+  res: NextApiResponse
+): Promise<{
   data: any[];
   error: any;
 }> => {
@@ -60,6 +64,20 @@ const getSomeOfEachCategory = async (): Promise<{
   } catch (e: any) {
     error = e.message;
   }
+  res.json({
+    data: responses.map((res) => ({
+      data: res.response.data,
+      topic: res.topic,
+    })),
+    error,
+  });
+  res.json({
+    data: responses.map((res) => ({
+      data: res.response.data,
+      topic: res.topic,
+    })),
+    error,
+  })
   return {
     data: responses.map((res) => ({
       data: res.response.data,
@@ -70,18 +88,3 @@ const getSomeOfEachCategory = async (): Promise<{
 };
 
 export default getSomeOfEachCategory;
-
-// --------------RESPONSE OBJECT
-// {
-//   "source": {
-//       "id": "cnn",
-//       "name": "CNN"
-//   },
-//   "author": "Nectar Gan and Steve George, CNN",
-//   "title": "Who is Zhang Gaoli? The man at the center of Chinese tennis star Peng Shuai's #MeToo allegation - CNN",
-//   "description": "Before retiring as vice premier, Zhang Gaoli was the face of China's organizing efforts ahead of the 2022 Winter Olympics.",
-//   "url": "https://www.cnn.com/2021/11/25/china/who-is-zhang-gaoli-intl-hnk-dst/index.html",
-//   "urlToImage": "https://cdn.cnn.com/cnnnext/dam/assets/211124031006-zhang-gaoli-thomas-bach-beijing-file-2016-super-tease.jpg",
-//   "publishedAt": "2021-11-25T10:09:00Z",
-//   "content": "\"This was originally a scandal against Zhang, but the (party's) fetish for power has blunted its response, turning a personal scandal into a national scandal.\"\r\nDeng Yuwen, a political analyst"
-// }
