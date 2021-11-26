@@ -1,4 +1,5 @@
 import type { GetServerSideProps, NextPage } from "next";
+import axios from "axios"
 import { useEffect, useState } from "react";
 
 import Alert from "@mui/material/Alert";
@@ -7,8 +8,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import NewsCategories from "../components/App/NewsCategories";
-import TheLayout from "../components/Layout/TheLayout";
-import getSomeOfEachCategory from "./api/getSomeOfEachCategory";
+import TheLayout from "../components/Layout/TheLayout"
 
 interface Props {
   news: {
@@ -18,7 +18,7 @@ interface Props {
     message: string;
   };
 }
-
+const isBrowser = typeof window !== "undefined"
 const Home: NextPage<Props> = ({ news, error }) => {
   const [isLoading, setLoading] = useState<boolean>(true);
   useEffect(() => {
@@ -28,7 +28,7 @@ const Home: NextPage<Props> = ({ news, error }) => {
   }, [news, error]);
 
   const reloadHandler = () => {
-    window.location.reload();
+    isBrowser && window.location.reload();
   };
 
   return (
@@ -97,11 +97,17 @@ const Home: NextPage<Props> = ({ news, error }) => {
 export default Home;
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const { data: responses, error } = await getSomeOfEachCategory();
+  let response = null
+  let error = null
+  try {
+  response = await axios.get("http://localhost:3000/api/categories/");
+  }catch(e: any) {
+    error = e.message
+  }
   return {
     props: {
       news: {
-        data: responses,
+        data: response ? response.data.data : null,
       },
       error: {
         message: error,
