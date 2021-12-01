@@ -1,19 +1,20 @@
-import axios from "axios";
-import Link from "next/link"
-import Box from "@mui/material/Box";
-import { useState } from "react";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
 import { GetServerSideProps, NextPage } from "next";
-import TheLayout from "../../components/Layout/TheLayout";
+
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
 import CardActions from "@mui/material/CardActions";
-import Divider from "@mui/material/Divider";
+import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
+import Divider from "@mui/material/Divider";
+import Link from "next/link";
 import Pagination from "@mui/material/Pagination";
+import Stack from "@mui/material/Stack";
+import TheLayout from "../../components/Layout/TheLayout";
+import Typography from "@mui/material/Typography";
+import axios from "axios";
 import { useRouter } from "next/router";
+import { useState } from "react";
 
 const isBrowser = typeof window !== "undefined";
 interface Props {
@@ -34,19 +35,29 @@ const Technology: NextPage<Props> = ({ data }) => {
     <TheLayout>
       {data.articles.map((a: any) => (
         <Card key={a.title} sx={{ my: 2 }}>
-          <Stack direction="row">
+          <Box
+            sx={{
+              display: {
+                sm: "flex",
+              },
+            }}
+          >
             <CardMedia
               sx={{
                 width: {
                   xs: "100%",
-                  md: "200px",
+                  sm: "200px",
+                },
+                height: {
+                  xs: "200px",
+                  sm: "auto",
                 },
               }}
               component="img"
               image={a.urlToImage}
               alt={a.title}
             />
-            <Stack>
+            <Stack sx={{flexGrow: 1}}>
               <CardContent>
                 <Stack
                   direction="row"
@@ -92,12 +103,14 @@ const Technology: NextPage<Props> = ({ data }) => {
                     )}
                   </Box>
                   <Link href={a.url} passHref>
-                    <Button target="_blank" component="a">Read More</Button>
+                    <Button target="_blank" component="a">
+                      Read More
+                    </Button>
                   </Link>
                 </Stack>
               </CardActions>
             </Stack>
-          </Stack>
+          </Box>
         </Card>
       ))}
 
@@ -127,7 +140,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
         },
       }
     );
-  } catch (e: any) {
+  } catch (e:any) {
     error.message = e.message;
   }
   return {
