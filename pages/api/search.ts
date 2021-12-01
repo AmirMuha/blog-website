@@ -1,12 +1,13 @@
+import { NextApiRequest, NextApiResponse } from "next";
+
 import axios from "axios";
-import { NextApiResponse, NextApiRequest } from "next";
 
 const search = async (req: NextApiRequest, res: NextApiResponse) => {
   let response = null;
   let error = null;
   try {
     response = await axios.get(
-      `https://newsapi.org/v2/top-headlines?q=${req.query.q}&pageSize=5&country=us`,
+      `https://newsapi.org/v2/top-headlines?q=${req.query.q}`,
       {
         headers: {
           Authorization: process.env.NEWS_API_KEY!,
@@ -21,4 +22,5 @@ const search = async (req: NextApiRequest, res: NextApiResponse) => {
     error
   })
 };
+
 export default search;

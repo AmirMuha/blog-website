@@ -1,21 +1,32 @@
-import DropDownIcon from "@mui/icons-material/ArrowDropDown";
-import SearchIcon from "@mui/icons-material/Search";
+import React, { FC, ImgHTMLAttributes, useRef, useState } from "react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Slide from "@mui/material/Slide";
+import { alpha, styled } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
+import DropDownIcon from "@mui/icons-material/ArrowDropDown";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
+import Link from "next/link";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import { alpha, styled } from "@mui/material/styles";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import SearchIcon from "@mui/icons-material/Search";
+import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { FC, useState } from "react";
+import Img from "../UI/Img";
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...(props as any)} />;
+});
 
 const SearchInput = styled(InputBase)(({ theme }) => ({
   width: "100%",
@@ -35,20 +46,23 @@ const SearchInput = styled(InputBase)(({ theme }) => ({
     },
   },
 }));
-const ButtonWithIcon = styled(IconButton)(({ theme }) => ({
-  marginRight: "20px",
-  [theme.breakpoints.up("sm")]: {
-    display: "none",
-  },
-}));
+// const ButtonWithIcon = styled(IconButton)(({ theme }) => ({
+//   marginRight: "20px",
+//   [theme.breakpoints.up("sm")]: {
+//     display: "none",
+//   },
+// }));
 
 interface Props {
   topics: string[];
 }
-const isBrowser = typeof window !== "undefined"
+const isBrowser = typeof window !== "undefined";
 const TheHeader: FC<Props> = ({ topics }) => {
+  const [isResultBoxOpen, setIsResultBoxOpen] = useState<boolean>(false);
+  const searchBoxRef = useRef<HTMLDivElement>(null);
   const { push: navigate } = useRouter();
   const [anchorEl, setAnchorEl] = useState<any>(null);
+  const [searchResult, setSearchResult] = useState<any>(null);
   const [searchText, setSearchText] = useState<string>("");
   const isMenuOpen = !!anchorEl;
   const anchorClickHandler = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -56,13 +70,25 @@ const TheHeader: FC<Props> = ({ topics }) => {
   };
   const searchHandler = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Searching for %s ...", searchText);
+    console.log(searchText);
+    isBrowser &&
+      fetch(`/api/search?q=${searchText}`)
+        .then((res) => res.json())
+        .then((resData) => {
+          console.log(resData.data);
+          setSearchResult(resData.data);
+          setIsResultBoxOpen(true);
+        })
+        .catch((e) => {
+          // setAlert({})
+        });
     setSearchText("");
   };
 
   const navigationHandler = (topic: string) => {
     navigate(`/${topic}/1`);
   };
+
   return (
     <>
       <Box
@@ -117,9 +143,10 @@ const TheHeader: FC<Props> = ({ topics }) => {
                           component="a"
                           sx={{
                             textTransform: "capitalize",
-                            ...(isBrowser && window.location.pathname===(`/${topic}/1`)
-                              ? { color: "orange",textDecoration: "underline" }
-                              : {}) as any,
+                            ...((isBrowser &&
+                            window.location.pathname === `/${topic}/1`
+                              ? { color: "orange", textDecoration: "underline" }
+                              : {}) as any),
                           }}
                         >
                           {topic}
@@ -173,8 +200,12 @@ const TheHeader: FC<Props> = ({ topics }) => {
         component="form"
         sx={{ display: "flex", alignItems: "center", rowGap: 1, mt: 2 }}
       >
-        <Box sx={{ width: 1, position: "relative" }}>
-          <SearchInput placeholder="Search for specific keyword, topic, and etc..." />
+        <Box ref={searchBoxRef as any} sx={{ width: 1, position: "relative" }}>
+          <SearchInput
+            value={searchText}
+            onChange={(v) => setSearchText(v.currentTarget.value)}
+            placeholder="Search for specific keyword, topic, and etc..."
+          />
           <Box
             position="absolute"
             sx={{
@@ -191,6 +222,87 @@ const TheHeader: FC<Props> = ({ topics }) => {
           Search
         </Button>
       </Box>
+
+      <Dialog
+        open={isResultBoxOpen}
+        maxWidth="md"
+        keepMounted
+        fullWidth
+        TransitionComponent={Transition as any}
+        onClose={() => {
+          setIsResultBoxOpen(false);
+          setSearchResult(null);
+        }}
+      >
+        <DialogTitle>
+          <Box
+            onSubmit={searchHandler}
+            component="form"
+            sx={{ display: "flex", alignItems: "center", gap: 2 }}
+          >
+            <IconButton
+              onClick={() => {
+                setIsResultBoxOpen(false);
+                setSearchResult(null);
+              }}
+            >
+              <ArrowBackIcon />
+            </IconButton>
+            <Box ref={searchBoxRef as any} sx={{ width: 1, display: "flex" }}>
+              <Box sx={{ flexGrow: 1, position: "relative" }}>
+                <SearchInput
+                  value={searchText}
+                  onChange={(v) => setSearchText(v.currentTarget.value)}
+                  placeholder="Search for specific keyword, topic, and etc..."
+                />
+                <Box
+                  position="absolute"
+                  component="span"
+                  sx={{
+                    top: 1 / 2,
+                    bottom: 1 / 2,
+                    right: 15,
+                  }}
+                >
+                  <SearchIcon color="disabled" />
+                </Box>
+              </Box>
+              <Button type="submit" variant="contained" color="info">
+                Search
+              </Button>
+            </Box>
+          </Box>
+        </DialogTitle>
+        <DialogContent dividers>
+          {searchResult?.articles!.length > 0 ? (
+            <List>
+              {searchResult?.articles!.map((sr: any) => (
+                <ListItem  key={sr.title}>
+                  <Link passHref href={sr.url} >
+                    <Button component="a" target="_blank" sx={{justifyContent: "start",width: "100%"}}>
+                      <Stack alignItems="center" spacing={2} direction="row">
+                        <Img src={sr.urlToImage} alt={sr.title} />
+                        <Box
+                          component="span"
+                          sx={{
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {sr.title}
+                        </Box>
+                      </Stack>
+                    </Button>
+                  </Link>
+                </ListItem>
+              ))}
+            </List>
+          ) : (
+            <Box>
+              <Typography variant="h6">No result found !</Typography>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
