@@ -1,5 +1,4 @@
 import type { GetServerSideProps, NextPage } from "next";
-import axios from "axios"
 import { useEffect, useState } from "react";
 
 import Alert from "@mui/material/Alert";
@@ -8,7 +7,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import NewsCategories from "../components/App/NewsCategories";
-import TheLayout from "../components/Layout/TheLayout"
+import TheLayout from "../components/Layout/TheLayout";
+import axios from "axios";
 
 interface Props {
   news: {
@@ -18,7 +18,7 @@ interface Props {
     message: string;
   };
 }
-const isBrowser = typeof window !== "undefined"
+const isBrowser = typeof window !== "undefined";
 const Home: NextPage<Props> = ({ news, error }) => {
   const [isLoading, setLoading] = useState<boolean>(true);
   useEffect(() => {
@@ -47,7 +47,7 @@ const Home: NextPage<Props> = ({ news, error }) => {
               {error.message && error?.message?.includes("429") ? (
                 <Alert icon={<AlertIcon />} color="error">
                   Sorry you have to try later 100 request per day is over. Try
-                  again tomorrow.
+                  again tomorrow.{" "}
                 </Alert>
               ) : (
                 <>
@@ -97,12 +97,12 @@ const Home: NextPage<Props> = ({ news, error }) => {
 export default Home;
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  let response = null
-  let error = null
+  let response = null;
+  let error = null;
   try {
-  response = await axios.get("http://localhost:3000/api/categories/");
-  }catch(e: any) {
-    error = e.message
+    response = await axios.get("/api/categories/");
+  } catch (e: any) {
+    error = e.message;
   }
   return {
     props: {
