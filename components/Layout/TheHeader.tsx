@@ -1,28 +1,32 @@
-import React, { FC, ImgHTMLAttributes, useRef, useState } from "react";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import Slide from "@mui/material/Slide";
-import { alpha, styled } from "@mui/material/styles";
+import React, { FC, useContext, useRef, useState } from "react";
+import { alpha, styled, useTheme } from "@mui/material/styles";
+
 import AppBar from "@mui/material/AppBar";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
 import DropDownIcon from "@mui/icons-material/ArrowDropDown";
 import IconButton from "@mui/material/IconButton";
+import Img from "../UI/Img";
 import InputBase from "@mui/material/InputBase";
+import LightModeIcon from "@mui/icons-material/LightMode";
 import Link from "next/link";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import SearchIcon from "@mui/icons-material/Search";
+import Slide from "@mui/material/Slide";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import { ctx } from "../../store/context/topics";
 import { useRouter } from "next/router";
-import Img from "../UI/Img";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...(props as any)} />;
@@ -46,18 +50,17 @@ const SearchInput = styled(InputBase)(({ theme }) => ({
     },
   },
 }));
-// const ButtonWithIcon = styled(IconButton)(({ theme }) => ({
-//   marginRight: "20px",
-//   [theme.breakpoints.up("sm")]: {
-//     display: "none",
-//   },
-// }));
 
 interface Props {
   topics: string[];
 }
+
 const isBrowser = typeof window !== "undefined";
 const TheHeader: FC<Props> = ({ topics }) => {
+  const { toggleTheme } = useContext(ctx);
+  const {
+    palette: { mode: ThemeMode },
+  } = useTheme();
   const [isResultBoxOpen, setIsResultBoxOpen] = useState<boolean>(false);
   const searchBoxRef = useRef<HTMLDivElement>(null);
   const { push: navigate } = useRouter();
@@ -108,7 +111,7 @@ const TheHeader: FC<Props> = ({ topics }) => {
               px: 0,
             },
           }}
-          color="transparent"
+          color="inherit"
           position="sticky"
         >
           <Toolbar>
@@ -221,6 +224,19 @@ const TheHeader: FC<Props> = ({ topics }) => {
         <Button type="submit" variant="contained" color="info">
           Search
         </Button>
+        <Button
+          onClick={toggleTheme}
+          sx={{
+            marginLeft: 1,
+            backgroundColor: ThemeMode === "dark" ? "#fff" : "#222",
+            "&:hover": {
+              backgroundColor: ThemeMode === "dark" ? "#999" : "#111",
+            },
+          }}
+          variant="contained"
+        >
+          {ThemeMode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+        </Button>
       </Box>
 
       <Dialog
@@ -277,9 +293,13 @@ const TheHeader: FC<Props> = ({ topics }) => {
           {searchResult?.articles!.length > 0 ? (
             <List>
               {searchResult?.articles!.map((sr: any) => (
-                <ListItem  key={sr.title}>
-                  <Link passHref href={sr.url} >
-                    <Button component="a" target="_blank" sx={{justifyContent: "start",width: "100%"}}>
+                <ListItem key={sr.title}>
+                  <Link passHref href={sr.url}>
+                    <Button
+                      component="a"
+                      target="_blank"
+                      sx={{ justifyContent: "start", width: "100%" }}
+                    >
                       <Stack alignItems="center" spacing={2} direction="row">
                         <Img src={sr.urlToImage} alt={sr.title} />
                         <Box

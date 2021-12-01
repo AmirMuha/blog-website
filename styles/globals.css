@@ -21,3 +21,6 @@ a {
 *::-webkit-scrollbar-thumb {
   background: gray;
 }
+.dark {
+  background-color: #222;
+}

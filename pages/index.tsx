@@ -36,7 +36,7 @@ const Home: NextPage<Props> = ({ news, error }) => {
       {isLoading ? (
         <div>Loading</div>
       ) : (
-        <TheLayout>
+        <TheLayout title={"Latest News | News-ify"}>
           <Container
             sx={{
               margin: "0 auto",

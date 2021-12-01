@@ -32,7 +32,7 @@ const Technology: NextPage<Props> = ({ data }) => {
     navigate(`/${query.topic}/${val}`);
   };
   return (
-    <TheLayout>
+    <TheLayout title={`Latest ${query?.topic! as string} news | News-ify` || "Latest News | News-ify"}>
       {data.articles.map((a: any) => (
         <Card key={a.title} sx={{ my: 2 }}>
           <Box
