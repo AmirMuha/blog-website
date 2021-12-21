@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Alert from "@mui/material/Alert";
 import AlertIcon from "@mui/icons-material/Warning";
 import Box from "@mui/material/Box";
+import Loading from "../components/UI/Loading"
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import NewsCategories from "../components/App/NewsCategories";
@@ -19,6 +20,7 @@ interface Props {
   };
 }
 const isBrowser = typeof window !== "undefined";
+
 const Home: NextPage<Props> = ({ news, error }) => {
   const [isLoading, setLoading] = useState<boolean>(true);
   useEffect(() => {
@@ -33,9 +35,7 @@ const Home: NextPage<Props> = ({ news, error }) => {
 
   return (
     <>
-      {isLoading ? (
-        <div>Loading</div>
-      ) : (
+        <Loading open={isLoading} />
         <TheLayout title={"Latest News | News-ify"}>
           <Container
             sx={{
@@ -89,7 +89,6 @@ const Home: NextPage<Props> = ({ news, error }) => {
             </Box>
           </Container>
         </TheLayout>
-      )}
     </>
   );
 };
@@ -103,6 +102,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
     response = await axios.get("/api/categories/");
   } catch (e: any) {
     error = e.message;
+    console.log(e)
   }
   return {
     props: {
