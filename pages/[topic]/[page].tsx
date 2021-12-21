@@ -145,7 +145,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   }
   return {
     props: {
-      data: response.data && response?.data,
+      data: response?.data && response?.data,
       error: {
         message: (error?.message && error?.message) || null,
       },
