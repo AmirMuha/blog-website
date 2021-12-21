@@ -99,10 +99,9 @@ export const getServerSideProps: GetServerSideProps = async () => {
   let response = null;
   let error = null;
   try {
-    response = await axios.get("/api/categories/");
+    response = await axios.get(`${process.env.AppBaseURL}/api/categories/`);
   } catch (e: any) {
     error = e.message;
-    console.log(e)
   }
   return {
     props: {
