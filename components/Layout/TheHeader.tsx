@@ -1,6 +1,7 @@
 import React, { FC, useContext, useRef, useState } from "react";
+import HorizontalMenu from "../UI/HorizontalMenu"
 import { alpha, styled, useTheme } from "@mui/material/styles";
-
+import DropdownMenu from "../UI/DropdownMenu"
 import AppBar from "@mui/material/AppBar";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Box from "@mui/material/Box";
@@ -9,8 +10,6 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import Divider from "@mui/material/Divider";
-import DropDownIcon from "@mui/icons-material/ArrowDropDown";
 import IconButton from "@mui/material/IconButton";
 import Img from "../UI/Img";
 import InputBase from "@mui/material/InputBase";
@@ -18,15 +17,13 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import Link from "next/link";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
 import SearchIcon from "@mui/icons-material/Search";
 import Slide from "@mui/material/Slide";
 import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { ctx } from "../../store/context/topics";
-import { useRouter } from "next/router";
+import Loading from "../UI/Loading"
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...(props as any)} />;
@@ -57,43 +54,36 @@ interface Props {
 
 const isBrowser = typeof window !== "undefined";
 const TheHeader: FC<Props> = ({ topics }) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { toggleTheme } = useContext(ctx);
   const {
     palette: { mode: ThemeMode },
   } = useTheme();
   const [isResultBoxOpen, setIsResultBoxOpen] = useState<boolean>(false);
   const searchBoxRef = useRef<HTMLDivElement>(null);
-  const { push: navigate } = useRouter();
-  const [anchorEl, setAnchorEl] = useState<any>(null);
   const [searchResult, setSearchResult] = useState<any>(null);
   const [searchText, setSearchText] = useState<string>("");
-  const isMenuOpen = !!anchorEl;
-  const anchorClickHandler = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(e.currentTarget);
-  };
   const searchHandler = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(searchText);
+    setIsLoading(true);
     isBrowser &&
       fetch(`/api/search?q=${searchText}`)
         .then((res) => res.json())
         .then((resData) => {
-          console.log(resData.data);
           setSearchResult(resData.data);
           setIsResultBoxOpen(true);
         })
         .catch((e) => {
           // setAlert({})
         });
+    setIsLoading(false);
     setSearchText("");
   };
 
-  const navigationHandler = (topic: string) => {
-    navigate(`/${topic}/1`);
-  };
 
   return (
     <>
+      <Loading open={isLoading} />
       <Box
         sx={{
           mt: 2,
@@ -122,80 +112,8 @@ const TheHeader: FC<Props> = ({ topics }) => {
               </a>
             </Link>
           </Toolbar>
-          <Box>
-            <Box
-              sx={{
-                display: {
-                  xs: "none",
-                  md: "initial",
-                },
-              }}
-            >
-              <List
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  rowGap: 2,
-                }}
-              >
-                {topics.length > 0 &&
-                  topics.map((topic) => (
-                    <ListItem key={topic}>
-                      <Link passHref href={`/${topic}/1`}>
-                        <Box
-                          component="a"
-                          sx={{
-                            textTransform: "capitalize",
-                            ...((isBrowser &&
-                            window.location.pathname === `/${topic}/1`
-                              ? { color: "orange", textDecoration: "underline" }
-                              : {}) as any),
-                          }}
-                        >
-                          {topic}
-                        </Box>
-                      </Link>
-                    </ListItem>
-                  ))}
-              </List>
-            </Box>
-            <Box
-              sx={{
-                display: {
-                  md: "none",
-                },
-              }}
-            >
-              <Button
-                sx={{ textTransform: "capitalize" }}
-                endIcon={<DropDownIcon />}
-                onClick={anchorClickHandler}
-              >
-                Topics
-              </Button>
-              <Menu
-                onClose={() => setAnchorEl(null)}
-                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-                transformOrigin={{ vertical: "top", horizontal: "center" }}
-                open={isMenuOpen}
-                variant="menu"
-                anchorEl={anchorEl}
-              >
-                {topics.length > 0 &&
-                  topics.map((topic, i) => (
-                    <Box key={topic}>
-                      {i !== 0 && <Divider />}
-                      <MenuItem
-                        onClick={() => navigationHandler(topic)}
-                        title={topic}
-                      >
-                        {topic}
-                      </MenuItem>
-                    </Box>
-                  ))}
-              </Menu>
-            </Box>
-          </Box>
+          <HorizontalMenu url="/topic/1" dynamicPart="topic" options={topics}/>
+          <DropdownMenu title="Topics" options={topics} dynamicPart="topic" url="/topic/1" />
         </AppBar>
       </Box>
       <Box
